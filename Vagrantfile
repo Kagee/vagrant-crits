@@ -32,15 +32,15 @@ Vagrant.configure("2") do |config|
   # please see the online documentation at vagrantup.com.
 
   # Every Vagrant virtual environment requires a box to build off of.
-  config.vm.box = "ubuntu/trusty64"
-
+  #config.vm.box = "ubuntu/trusty64"
+  config.vm.box = "misheska/ubuntu1404"
   # The url from where the 'config.vm.box' box will be fetched if it
   # doesn't already exist on the user's system.
-  config.vm.box_url = "http://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box"
+  #config.vm.box_url = "http://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box"
 
   config.vm.provision "shell", path: 'crits.sh'
 
-  config.vm.network "public_network", bridge: 'eth1'
+  config.vm.network "public_network", bridge: 'eth0'
 
   config.vm.network "forwarded_port", guest: 443, host: 8443
 
