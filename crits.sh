@@ -55,6 +55,7 @@ git clone https://github.com/crits/crits.git
 
 cd /data/crits
 git pull
+git checkout stable_3 # more stable envrionment?
 
 # Setting up your single server instance of MongoDB
 cd /data/crits/contrib/mongo/UMA 
