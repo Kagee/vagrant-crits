@@ -41,12 +41,19 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", path: 'crits.sh'
 
   config.vm.network "public_network", bridge: 'eth0'
+  #config.vm.network :private_network, ip: "192.168.56.101"
+  #config.vm.network "private_network", ip: "10.255.128.2"
 
   config.vm.network "forwarded_port", guest: 443, host: 8443
 
   config.vm.provider :virtualbox do |vb|
     #vb.gui = true
     vb.customize ["modifyvm", :id, "--memory", "4096"]
+    # TODO: Find configsettings for two cpus
   end
-
+  config.vm.provider "vmware_workstation" do |vw|
+    #vw.gui = true
+    vw.vmx["memsize"] = "4096"
+    vw.vmx["numvcpus"] = "2"
+  end
 end
