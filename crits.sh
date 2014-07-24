@@ -1,7 +1,9 @@
 #! /bin/bash
 
 #DEVELOPMENT CHOICE#
-#echo 'Acquire::http { Proxy "http://192.168.1.38:3142"; };' >> /etc/apt/apt.conf.d/01proxy
+GATEWAY=$(ip route show | grep ^default | cut -d' ' -f 3)
+HOST="$(echo -n $GATEWAY | cut -d . -f 1-3).$(($(echo $GATEWAY | cut -d . -f 4 )-1))"
+echo "Acquire::http { Proxy \"http://$HOST:3142\"; };" >> /etc/apt/apt.conf.d/01proxy
 #DEVELOPMENT CHOICE#
 
 echo 'deb http://archive.ubuntu.com/ubuntu trusty multiverse' >> /etc/apt/sources.list
@@ -15,9 +17,9 @@ apt-get install --yes vim git htop most
 cd /root
 
 #DEVELOPMENT CHOICE# 
-# cp -R /vagrant/crits/crits_dependencies /root/crits_dependencies
+cp -R /vagrant/git-repos/crits_dependencies /root/crits_dependencies
 # Comment out these two lines if using the line over
-git clone https://github.com/crits/crits_dependencies.git
+#git clone https://github.com/crits/crits_dependencies.git
 #DEVELOPMENT CHOICE#
 
 
@@ -26,7 +28,7 @@ git pull
 ./install_dependencies.sh
 
 # "python manage.py create_default_collections" requires python-magic
-apt-get install python-magic
+apt-get install --yes python-magic
 
 echo 1 > /proc/sys/net/ipv4/tcp_tw_reuse
 echo 1 > /proc/sys/net/ipv4/tcp_tw_recycle
@@ -35,9 +37,9 @@ mkdir /data
 cd /data
 
 #DEVELOPMENT CHOICE# 
-#cp -R /vagrant/crits/crits_services /data/crits_services
+cp -R /vagrant/git-repos/crits_services /data/crits_services
 # Comment out this line if using the line over
-git clone https://github.com/crits/crits_services.git
+#git clone https://github.com/crits/crits_services.git
 #DEVELOPMENT CHOICE#
 
 cd /data/crits_services
@@ -48,9 +50,9 @@ mkdir -p /data/db
 cd /data
 
 #DEVELOPMENT CHOICE#
-#cp -R /vagrant/crits/crits /data/crits
+cp -R /vagrant/git-repos/crits /data/crits
 # Comment out this line if using the line over
-git clone https://github.com/crits/crits.git
+#git clone https://github.com/crits/crits.git
 #DEVELOPMENT CHOICE#
 
 cd /data/crits
@@ -89,11 +91,14 @@ sed -i -e "s/SECRET_KEY = ''/SECRET_KEY = '${SECRET_KEY}'/" database.py
 cd /data/crits
 python manage.py create_default_collections
 
-python manage.py users --adduser -A --email=vagrant@example.com --firstname=Va --lastname=Grant --organization=ExampleOrg --setactive --username=vagrant > user.log
+# For HEAD 2014-07-24
+#python manage.py users --adduser -A --email=vagrant@example.com --firstname=Va --lastname=Grant --organization=ExampleOrg --setactive --username=vagrant
 
-grep 'Temp password: ' user.log | sed -e 's/Temp password: //' > /home/vagrant/CRITS_PASSWORD
+# for stable_3
+python manage.py adduser -a --email=vagrant@example.com --firstname=Va --lastname=Grant --organization=ExampleOrg --username=vagrant > user.log
 
-rm user.log
+grep 'Temp password' user.log | sed -e 's/Temp password:/User: vagrant\nPassword: /' > /home/vagrant/CRITS_PASSWORD
+#rm user.log
 
 # This should probably be changed
 python manage.py setconfig allowed_hosts '*'
@@ -140,5 +145,5 @@ sed -i -e 's%^Include /etc/apache2/sites-enabled/$%IncludeOptional sites-enabled
 
 echo -e '0 * * * *       cd /data/crits/ && /usr/bin/python manage.py mapreduces\n0 * * * *       cd /data/crits/ && /usr/bin/python manage.py generate_notifications' | crontab - -u crits
 
-echo "ADMIN PASSWORD: "
 cat /home/vagrant/CRITS_PASSWORD
+
